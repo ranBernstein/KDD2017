@@ -991,7 +991,7 @@ Computing Machinery]
 \def\acmISBN#1{\def\@acmISBN{#1}}
 \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
 \def\acmDOI#1{\def\@acmDOI{#1}}
-\acmDOI{10.1145/nnnnnnn.nnnnnnn}
+%\acmDOI{10.1145/}
 \newif\if@ACM@badge
 \@ACM@badgefalse
 \newlength\@ACM@badge@width

@@ -1,20 +1,35 @@
 \documentclass[sigconf]{acmart}
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
 \usepackage{booktabs} % For formal tables
+
 
 % Copyright
 %\setcopyright{none}
 %\setcopyright{acmcopyright}
 %\setcopyright{acmlicensed}
 \setcopyright{rightsretained}
+
 %\setcopyright{usgov}
 %\setcopyright{usgovmixed}
 %\setcopyright{cagov}
 %\setcopyright{cagovmixed}
 
 %Conference
-\acmConference[KDD'2017]{ACM Transactions on Knowledge Discovery from Data}{August 2017}{Halifax, Nova Scotia - Canada} 
-\acmYear{1997}
-\copyrightyear{2016}
+\acmConference[KDD'2017]{In proceedings of the ACM SIGKDD International Conference on Knowledge Discovery and Data
+Mining}{August 2017}{Halifax, Nova Scotia, Canada} 
+\acmYear{2017}
+\copyrightyear{2017}
+
+
+
+
+
+
+
+
 
 \usepackage{pgfplotstable}
 \usepackage{caption}
@@ -50,54 +65,32 @@
 % Document starts
 \begin{document}
 % Title portion
-\title{LDA Model Monitoring in Distributed Streaming System} 
-\author{Ran Bernstein}
+\title{LDA Classifier Monitoring in Distributed Streaming Systems} 
+\author{Ran Bernstein, Assaf Schuster}
 \affiliation{%
   \institution{Technion -- Israel Institute of Technology}
-  \department{Computer Science}
+  \department{Faculty of Computer Science}
   \city{Haifa}
   \postcode{32000}
   \country{Israel}
   }
-  \email{bernstein.ran@Gmail.com}
+  \email{bernstein.ran@gmail.com, assaf@cs.technion.ac.il}
   
-\author{Margarita Osadchy}
+\author{Margarita Osadchy, Daniel Keren}
 \affiliation{%
   \institution{University of Haifa}
-  \department{Computer Science}
+  \department{Department of Computer Science}
   \city{Haifa}
   \postcode{31905}
   \country{Israel}
 }
-\email{rita@cs.haifa.ac.il}
-
-\author{Daniel Keren}
-\affiliation{%
-  \institution{University of Haifa}
-  \department{Computer Science}
-  \city{Haifa}
-  \postcode{31905}
-  \country{Israel}
-}
-\email{dkeren@cs.haifa.ac.il}
-
-\author{Assaf Schuster}
-\affiliation{%
-  \institution{Technion -- Israel Institute of Technology}
-  \department{Computer Science}
-  \city{Haifa}
-  \postcode{32000}
-  \country{Israel}
-}
-\email{assaf@cs.technion.ac.il}
+\email{(rita,dkeren)@cs.haifa.ac.il}
 
 \begin{abstract}
 Real systems for mining data streams should be able to detect changes that affect the accuracy of the dynamic model describing the temporal data. A distributed setting poses one of the main challenges in this type of change detection. In a distributed setting, model training requires centralizing the data from all nodes (hereafter, synchronization), which is very costly in terms of communication. In order to minimize communication, a monitoring algorithm should be executed \emph{locally} at each node,
-while preserving the validity of the global model (that is, the model that will be computed if a synchronization takes place). To achieve this goal, we propose the first communication-efficient algorithm for monitoring a classification model over distributed, dynamic data streams. The classifier we monitor is the Linear Discriminant Analysis (LDA), a popular method for classification and dimensionality reduction in many fields. Please note that the emphasis of this work is \emph{not} on solving the distributed optimization problem
+while preserving the validity of the global model (that is, the model that will be computed if a synchronization takes place). To achieve this goal, we propose the first communication-efficient algorithm for monitoring a classification model over distributed, dynamic data streams. The classifier we monitor is Linear Discriminant Analysis (LDA), a popular method for classification and dimensionality reduction in many fields.  The emphasis of this work is \emph{not} on solving the distributed optimization problem
 that corresponds to finding a classifier over the distributed data; instead, we continuously
-monitor the current classifier to check that it still fits the data.
-
-In addition to the theoretical guarantee of the proposed monitoring algorithm, we demonstrate how it reduce communication volume by up to two orders of magnitude (compared to synchronization in every round) on three real data sets from different worlds of content, as well as its advantage over the
+monitor the current classifier to check that it still fits the data. In addition to the theoretical guarantee of the proposed monitoring algorithm, we demonstrate how it reduces communication volume by up to two orders of magnitude (compared to synchronization in every round) on three real data sets from different worlds of content, as well as its advantage over the
 popular periodic sampling paradigm. Moreover, our approach monitors the \emph{classification model itself} as opposed to its misclassifications, which makes it possible to detect the change before misclassification occurs.
 \end{abstract}
 
