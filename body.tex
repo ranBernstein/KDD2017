@@ -4,8 +4,8 @@ We address the problem of classifying streaming data which
 is \textit{distributed} over a large number of nodes. The streaming data distribution is not stationary, and can change over time. Popular examples of real-life problems that involve this kind of change are user preference prediction and fraud detection. In the former, the choices of the user can change over time; in the latter, the fraudulent transactions are constantly changed to avoid detection. In both cases, the change can render the classifier invalid.
 In such a setting --- where the model must be updated to stay valid and communication is costly --- the question is \textit{when} to recompute the model. The naive solution for this problem is recomputing the model periodically. The problem with this solution is that it involves needless work if the model changes infrequently, yet may introduce unacceptable errors between scheduled updates. 
 In contrast to periodical computation, we focus on \textit{monitoring} the quality of a given model, and recomputing it only when necessary. 
-\par We focus on linear binary classifiers, using LDA \cite{fisher1936use} as the classifier. This choice is motivated by the popularity of linear classifiers in real applications, and their usage as a platform for more complex classifiers, such as ensemble model in the work of ~\cite{Deva, eSVM}, neural networks in the work of ~\cite{osadchy2015k}, 
-and even deep architectures in the work of \cite{ROSS}. Our method is distinct from the previous work in the following two important aspects:
+\par We focus on a popular linear binary classifier, based on linear discriminant analysis (LDA) \cite{fisher1936use} . This choice is motivated by the popularity of linear classifiers in real applications, and their usage as a platform for more complex classifiers, such as ensemble model in the work of ~\cite{Deva, eSVM}, neural networks in the work of ~\cite{osadchy2015k}, 
+and even deep architectures in the work of \cite{ROSS}. Our method is distinct from previous work in the following two important aspects:
 
 \noindent \textbf{Model-Based Monitoring:} 
 In contrast to most previous work on monitoring a classifier (that utilizes misclassification rate to draw conclusions about the change in the distribution 
@@ -15,16 +15,16 @@ Monitoring the model, and not just its misclassifications, has an important bene
 \noindent \textbf{Distributed Setting:} 
 We note here that the problem we tackle is quite different from distributed
 {\em computation} of a classifier \cite{macua2011distributed}, and also
-from incrementally updating it\cite{pang2005incremental}. Here,
+from incrementally updating it \cite{pang2005incremental}. Here,
 we assume that the classifier was already constructed, but that new data
 keeps flowing into a set of distributed nodes. For this scenario, we propose a
 {\em tracking} mechanism, which does not keep updating the classifier, but
 quickly checks whether its initial value had changed by more than a
 pre-defined threshold. This stage is done while maintaining a small
-communication overhead between the nodes. Only if the threshold
+communication overhead between the nodes. Only if a local condition
 is violated, a communication protocol is activated. While local alert
-mechanism for detecting concept drift in distributed environments
-were studied before (~\cite{AngGZPH13}), our approach is, to the best of our knowledge, the only one that provides a provable guarantees of correctness. 
+mechanisms for detecting concept drift in distributed environments
+were studied before ~\cite{AngGZPH13}, our approach is, to the best of our knowledge, the only one that provides a provable guarantees of correctness. 
 
 \section{Related Work on Distributed Monitoring}
 Monitoring dynamic data streams is a broad topic which was addressed in different research communities. We focus on detecting changes in the stream that render the current data model invalid. 
@@ -34,7 +34,7 @@ For non-linear functions, examples include work on monitoring the value
 of a single-variable polynomial as in  ~\cite{shah2008handling},
 and eigenvalue perturbation as in the work of ~\cite{huang2007communication}.
 While the previous work handled specific families of functions, we chose to use the 
-\textit{geometric approach} for monitoring \textit{arbitrary} functions over distributed streams, as was proposed, and later extended and generalized in \cite{sharfman2007geometric, keren2014geometric, keren2012shape,gabel2015monitoring}. 
+\textit{geometric approach} for monitoring \textit{arbitrary} functions over distributed streams, as was proposed, and later extended and generalized in \cite{sharfman2007geometric, keren2014geometric,gabel2015monitoring}. 
 %A recently introduced work by 
 %~\cite{gabel2015monitoring} on monitoring Least % 
 %Square Regression (LSR) using geometric monitoring is the closest in %spirit to this work, but our problem is more complex, as
@@ -42,7 +42,7 @@ While the previous work handled specific families of functions, we chose to use 
 %computing the LDA classifier cannot be cast in this way.
 %
 \section{Problem Definition}
-We first describe the Linear Discriminant Analysis (LDA) algorithm and then define the monitoring problem. 
+We first describe the linear discriminant analysis (LDA) approach and then define the monitoring problem. 
 
 \subsection{Linear Discriminant Analysis}%\\ \par
 LDA seeks a linear combination of features that characterize or separate two or more classes of samples.
@@ -51,9 +51,11 @@ The resulting combination may be used as a linear classifier, or for dimensional
 The classification problem is solved by first assuming that the conditional probability
 density functions $Pr(\vec x|y=p)$ and $Pr(\vec x|y=q)$ are both normally distributed, with
 mean and covariance  $(p, B_p)$ and
-$(q, B_q)$, for two target classes $P$ and $Q$ respectively.\\
-${(x_1,y_1),\ldots,(x_n,y_n)}$ are i.i.d. samples, $x_i \in \mathbb{R}^d$
-and $y_i \in \{0,1\}$.
+$(q, B_q)$, for two target classes $P$ and $Q$ respectively. Assume
+the elements of both classes to lie in $\mathbb{R}^d$.
+% Let\\
+% ${(x_1,y_1),\ldots,(x_n,y_n)}$ be i.i.d. samples, $x_i \in \mathbb{R}^d$
+% and $y_i \in \{0,1\}$.
 
 We seek a linear projection defined by an inner product with a vector $w \in \mathbb{R}^d $,
 that maximizes the separation between the classes, where the separation is
@@ -63,52 +65,52 @@ within the classes:
 \frac{\sigma^2_{between}}{\sigma^2_{within}} = \frac{(w^T (p -
 q))^2}{w^T(B_p+B_q)w}.
 \end{equation}
-Solving the maximization problem yields that the decision criterion is a threshold on the
-dot product
-\begin{equation*} \label{eq:decision}
-w \cdot x > c
-\end{equation*}
-where
+Solving the maximization problem yields that the optimal projection is defined by an inner product
+with 
+%
 \begin{equation} \label{eq:w}
 w \propto (B_p+B_q)^{-1}(p - q)
 \end{equation}
-\begin{equation} \label{eq:c}
-c = \frac{1}{2}(T-{p}^T S_p^{-1} {p}+{q}^T S_q^{-1} {q}).
-\end{equation}
+
 In this work we monitor $w$, and will refer to it as the classification \textit{model}.
 
 \subsection{Monitoring Problem}
 \label{sub:problem}
 We denote the number of nodes by $k$ and the number of samples in a node by $W$.
 Our model assumes discrete time (hereafter, rounds). Every node receives a new sample
-in every round. We use the \textit{sliding window} model; every node keeps two sliding windows (one for each class) of length $W/2$. As a node receives a new observation, it replaces the oldest one from its class.
-$x^i_j$ and $y^i_j$ are the $j$'th sample and label in the $i$'th node
-and $x_{old}^i(p)$, $x_{old}^i(q)$ are the oldest samples from each class in
+in every round. We use the \textit{sliding window} model; every node keeps two sliding windows (one for each class) of length $W/2$. As a node receives a new observation, it replaces the oldest one from its class. Let
+$x^i_j$ and $y^i_j$ be the $j$'th sample and label in the $i$'th node,
+and $x_{old}^i(p)$, $x_{old}^i(q)$ be the oldest samples from each class in
 the sliding window of the $i$'th node.
 As data evolves, it is possible that the previously computed model
 no longer matches the current true model. Let $w_0$ be the last computed model, i.e. computed at the most recent synchronization, and let $w$ be the \textit{true} LDA model (the hypothetical model that a present synchronization would yield). So,
-we must bound the deviation of $w_0$ from $w$.
-For the classification purpose, the most important property of a linear classifier is its direction. Therefore, we monitor the change in this direction: given a threshold $T$, our goal is to raise an alert if
-\begin{equation} \label{eq:coneCritiria}
-\frac{<w,w_0>}{\parallel w \parallel \parallel w_0 \parallel}  < T.
-\end{equation}
-i.e. if the angle between $w_0$ and $w$ is above a certain threshold (the inner product between unit vectors is the cosine of the angle between them). Note that this
-defines a cone in Euclidean space -- that is, $w$ is valid as long as it is
-contained in a cone whose apex is $w_0$; the cone's opening angle determines
-the amount of "slack" by which $w$ is allowed to deviate from $w$.
+we must bound the deviation of $w_0$ from $w$. 
 
-%Due to the complexity of Eq. \ref{eq:coneCritiria},
-%we will monitor a simpler problem whose solution also satisfies
-Next, we replace the cone containment condition to a (solid) sphere containment condition, i.e., 
-%Eq. \ref{eq:coneCritiria}: the maximal volume sphere of which $w_0$ is its center
-%that resides completely inside the cone from Eq. ~\ref{eq:coneCritiria}.
-%This sphere is defined by
+Recall that the LDA optimal projection is defined by an inner product with
+$w$. Allowing a slight abuse of notation,
+we will often refer to $w$ as the classifier. 
+To measure the deviation of the classifier defined by an inner product
+with $w$ from the one defined by an inner product with $w_0$, we use the
+Euclidean distance between the two vectors, $||w-w_0||$. This measure
+can also be related to the change in orientation, as the classifier
+evolves over time, from $w_0$ to $w$. A 
+threshold on the angle $\theta$ between $w_0$ and $w$  is defined by the condition
+\begin{equation} \label{eq:coneCritiria}
+\frac{<w,w_0>}{\parallel w \parallel \parallel w_0 \parallel}  \geq  T,
+\end{equation}
+where $\cos(\theta) = T$. Note that this condition
+defines a cone in Euclidean space -- that is, $w$ is valid as long as it is
+contained in a cone whose axis is $w_0$; the cone's opening angle determines
+the amount of "slack" by which $w$ is allowed to deviate from $w_0$.
+We can relate this condition to an upper bound on $||w-w_0||$ as follows:
+find the maximal sphere centered at $w_0$ which is contained in the
+cone defined by Eq. \ref{eq:coneCritiria}. This yields the condition
+%
 \begin{equation} \label{eq:critiria}
 ||w-w_0||   \leq  R_0,
 \end{equation}
-where $R_0 := ||w_0|| \sqrt{1-T^2}$ is the radius of the maximal volume sphere with center $w_0$, and
-which resides inside the cone from condition \ref{eq:coneCritiria}. A probabilistic justification for
-this replacement\footnote{It is possible to compare the probabilities of a random vector, from a
+where $R_0 := ||w_0|| \sqrt{1-T^2}$. A probabilistic argument for
+the similarity of the two conditions\footnote{It is possible to compare the probabilities of a random vector, from a
 distribution centered at $w_0$, to fall in the sphere or in the cone.} is too long to 
 include here; we provide an example in the experiments section 
 (Fig. \ref{CosineVsEuclideanPowerSupply}).
@@ -132,20 +134,20 @@ initial values.
 initial state of the data is depicted in (A) and the state at a later point
 in time
 in (B), where the positive samples are concentrated around the "+" signs and
-the negative ones around the "-" signs; green and red represent the two classes.
+the negative ones around the "-" signs; green and red represent the two nodes.
 In configuration (B), every node  calculates the same orientation
 for the LDA classifier as it was in (A) -- i.e., the node's \emph{local view} is
-stationary. However, the orientation of the global data classifier (blue line) had very
+stationary. However, the orientation of the \emph{global} data classifier (blue line) had very
 significantly changed from (A) to (B).}
 \label{NegativeExample}
 \end{figure}
 
 
 \par To overcome this difficulty, we impose constraints on the local data at the nodes, rather than on the 
-local classifier. Specifically, we assign certain subsets, referred to as \textit{safe zones}, to each node,
-such that as long as local data remains inside the safe zones, it is guaranteed that the function of the global average ---  i.e. the Euclidean distance between the true global model to the one that was computed in the last synchronization (hereafter, \emph{model drift}) --- does not cross the threshold.
-In other words, we want to impose conditions on the local
-data at each node so that as long as they hold, $||w-w_0|| \leq R_0$, i.e., the global model is valid.
+local classifiers. Specifically, we assign certain subsets, referred to as \textit{safe zones}, to each node,
+such that as long as the local data remains inside the safe zones, it is guaranteed that the Euclidean distance between the true global model to the one that was computed in the last synchronization (hereafter, \emph{model drift}) --- does not cross the user-defined threshold.
+In other words, we  impose conditions on the local
+data at each node such that as long as they hold, $||w-w_0|| \leq R_0$.
 
 Nodes communicate only when the local data exits the
 safe zone, i.e.  a safe zone \textit{violation} (hereafter, just
@@ -176,7 +178,7 @@ w:=(S - pp^T - qq^T)^{-1}(p-q)=B^{-1}u.
 \end{equation}
 %In the following the subscript $0$ will denote the state at the time
 %of last synchronization.
-Let $w_0$ be the existing model, previously computed from $(S_0, p_0, q_0)$
+Let $w_0$ be the  model previously computed from $(S_0, p_0, q_0)$
 or from $(B_0,u_0)$ at the time of synchronization.
 Then,
 \begin{equation}
@@ -323,7 +325,8 @@ In both frameworks, every node runs the same
 update algorithm as detailed in Alg. \ref{NodeUpdate}.
 The frameworks differ in their synchronization policy; 
 the first, Distributed LDA Monitoring (DLDA), will synchronize in a round
-in which at least one node  reported a violation (condition \ref{eq:convexBound} in the node is not satisfied as detailed in Alg.~\ref{DLDA}).
+in which at least one node  reported a violation (the condition in Eq. \ref{eq:convexBound} 
+is not satisfied at this node).
 The second, Probabilistic Distributed LDA Monitoring (PDLDA), will synchronize in a round in which the number of nodes with a violation is above a certain
 threshold.
 The derivation of this threshold is presented in Section \ref{sec:PDLDA}.
@@ -403,7 +406,7 @@ policy results in many synchronizations even when the global model is still
 valid. This is due to the following reason: 
 recall that the global condition
 is that the average of certain vectors,
-which are constructed separately as each node, must lie inside a convex set $\mathcal{C}$.
+which are constructed separately at each node, must lie inside a convex set $\mathcal{C}$.
 To guarantee this condition, DLDA demands that {\em each} of the local vectors lie in
 $\mathcal{C}$. While correct, this is a gross "overkill", since, from
 the same considerations underlying the central limit theorem,
@@ -421,8 +424,8 @@ percentage of nodes report a violation.
 This percentage, denoted {\em VT}, is empirically determined on the training set. Then,
 when a node experiences a violation, it flips a coin (tuned to the value of {\em VT}),
 to decide whether to submit an alert or not. In Section \ref{sec:real}, we report
-results of both DLDA and PDLDA; the reduction in communication when using
-PDLDA is more noticeable as the number of nodes $k$ increases.
+results for both DLDA and PDLDA; the reduction in communication when using
+PDLDA is more noticeable as the number of nodes ($k$) increases.
 %
 %
 %
@@ -431,10 +434,10 @@ PDLDA is more noticeable as the number of nodes $k$ increases.
 We evaluated the performance of the proposed monitoring algorithms, DLDA and PDLDA, on synthetic and real data. For each dataset we simulated a distributed data stream by partitioning the data between the nodes and streaming it one sample in a round. 
 
 \subsection{Synthetic Data Experiments}
-We used synthetic data, in which we control the data generation process, to
+We first used synthetic data, in which we control the data generation process, to
 demonstrate the communication efficiency of our method (Section \ref{sec:com_eff})
 and its ability to alert when the current model isn't valid \emph{before} 
-misclassifications occur (Section \ref{sec:earlydetection}). We then (Section \ref{sec:paramanal}) analyze the communication efficiency of our method as a function of
+misclassifications occur (Section \ref{sec:earlydetection}). We then (Section \ref{sec:paramanal}) analyze the communication efficiency  as a function of
 some of the data parameters.
 %
 %
@@ -472,7 +475,7 @@ Figure \ref{PERvsDLDAoverTime} depicts DLDA's behavior for the synthetic dataset
 three points in time at which the data abruptly changes. 
 DLDA achieves a communication overhead of 0.01 messages per node per round, with the model 
 error guaranteed to always be below the given threshold.
-On the other hand,  PER(100) (whose overall communication is equal to DLDA's) doesn't maintain the
+On the other hand,  PER(100) (whose overall communication is equal to DLDA's) does not maintain the
 model error below the threshold (red dashed line).
 Figure \ref{PERvsDLDAoverTime} shows that PER(100) does not always 
 synchronize when the model drift exceeds a given threshold. 
@@ -539,8 +542,8 @@ more communication than DLDA, it will also miss model violations.
 \end{figure}
 %
 
-\noindent\textbf{Node Scalability:}
-Node Scalability measures how DLDA performs with different numbers of nodes.
+\noindent\textbf{Node Scalability}
+measures how DLDA performs with different numbers of nodes.
 Figure \ref{Nodes} shows the communication volume as a function of the number of nodes $k$.
 We note that communication increases rather gradually, reaching 0.25\% on the fixed
 data and 0.6\% on the dynamic data distributed across 25 nodes. By "fixed" data we
@@ -548,7 +551,7 @@ refer to two Gaussians as in Section \ref{sec:com_eff} whose centers do not chan
 but some communication is required due to the randomness in generating
 samples from the two class distributions. 
 
-\noindent\textbf{Window Size:}
+\noindent\textbf{Window Size.}
 Figure \ref{WindowSize} shows how communication decreases as a result
 of increasing the window size $W$.  One can increase the window size to compensate 
 for other factors, such as the magnitude of 
@@ -561,7 +564,7 @@ data generating distribution).
 \begin{minipage}{.29\textwidth}
 \includegraphics[width=55mm]{graphics/Nodes.png}
   \captionof{figure}{Communication as a function of the number of nodes for fixed (blue)
-  and changing (dashed green line) datasets}
+  and changing (green dashed line) datasets}
   \label{Nodes}
 \end{minipage}%
 \hfill
@@ -601,12 +604,18 @@ The second (Power Consumption Monitoring) is medium size
 (distributed over 36 nodes) and we tested both DLDA and PDLDA on it.
 The third (Gas Sensor Time Series Monitoring) is larger (distributed over
 100 nodes). The DLDA synchronization policy is too strict for such a large number of nodes
-(see Sections \ref{sec:PDLDA}),
+(see Section \ref{sec:PDLDA}),
 hence on this set we tested only the probabilistic version, PDLDA.
 %
+We tried to demonstrate as many features of the proposed algorithms as possible,
+including the comparison of the two metrics for measuring model
+drift (Euclidean distance vs. cosine similarity, Section \ref{sub:problem}), 
+performance vs. PER, and response to abrupt changes in the data. Lack of
+space did not allow us, however, to present the results of each of the
+above for all three data sets.
+
 \subsubsection{Message Preference Monitoring --- Usenet}
-The USENET dataset \cite{usenet} is a text dataset that simulates a stream of messages 
-from three newsgroups (medicine, space, baseball); 
+The USENET dataset \cite{usenet} (5,931 instances, 128 attributes) is a text dataset that simulates a stream of messages from three newsgroups (medicine, space, baseball); 
 the messages are presented sequentially to a user, who then labels them as "interesting" or "boring", 
 according to his/hers personal interest; these form the two categories.
 The attribute values are binary, indicating the presence or absence of 128 keywords. 
@@ -614,13 +623,16 @@ The change in the data corresponds to a change in the user's interest (e.g. from
 
 Figure \ref{usenet} shows the results of the DLDA algorithm with $W=450$. The first 450 rounds over the data correspond to
 the initialization phase and are omitted. During the next 50 rounds the DLDA model drift 
-(the value is calculated using the LHS in the inequality in Eq. \ref{eq:convexBound}) 
+(calculated using the LHS in the inequality in Eq. \ref{eq:convexBound}) 
 increases due to noise in the data; there is no change in the user's
 interests.
 From round 500 to 600 the DLDA model drift is small, and again, due only to the noise. In round 600 there is an abrupt concept
 change.
 From this point both the DLDA model drift and the true model drift increase until the synchronization 
-in round 698, at which the error drops to zero. 
+in round 698, at which the error drops to zero. Note that due to the sliding window,
+there will always be some "reaction time" until the concept drift is detected, as
+the window consists of a mixture of data some of which corresponds to the old
+model, and some to the new one.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=8cm, height=40mm]{graphics/DriftDetected.png}
@@ -637,7 +649,7 @@ in round 698, at which the error drops to zero.
 \subsubsection{Power Consumption Monitoring}
 
 
-The Power Consumption dataset  \cite{powerSupply} contains the hourly power supply of an
+The Power Consumption dataset  \cite{powerSupply} (29,928 instances, 2 attributes) contains the hourly power supply of an
 Italian electric company as recorded from two sources: power supplied
 by the main grid and power transformed from other grids.
 The stream contains three-year power supply records
@@ -671,12 +683,12 @@ PER suffers from very large errors.
 	\includegraphics[width=9cm,height=40mm]{graphics/PERvsDLDAonPowerSupply.png}
 	%\includegraphics[width=\textwidth]{Usenet/DriftDetected.png}
 	\caption{DLDA error (blue) vs. PER(50) error (green), for the power supply
-	data described above. Horizontal axis represents rounds, vertical
+	data. Horizontal axis represents rounds, vertical
 	axis represents the norm of the difference between the real (global) model and the 
 	current model held at the nodes. Window size is 1,000.
 	The maximum allowed error (which DLDA guarantees will never be
 	exceeded) is $T = 0.7$ (which corresponds to a difference of
-	0.8 radians, or $45^{\circ}$, in the classifier's orientation). Both
+	0.8 radians, or $46^{\circ}$, in the classifier's orientation). Both
 	algorithms transmit the same overall number of bytes, but at different
 	rounds; while PER sends alerts periodically, DLDA alerts only when the classifier may have changed. For this reason, PER suffers from a larger
 	error when the two classes change.}
@@ -705,51 +717,47 @@ over DLDA is more noticeable when more nodes are present.
 
     \begin{subfigure}[b]{0.5\textwidth}
         \includegraphics[width=\textwidth]{graphics/36nodes.png}
-        \caption{k=36 Nodes, W=600, VT=0}
+        \caption{k=36 Nodes, W=600, $VT$=0\%}
     \end{subfigure}
 
     \begin{subfigure}[b]{0.5\textwidth}
         \includegraphics[width=\textwidth]{graphics/36nodesProb.png}
-        \caption{k=36 Nodes, W=600, VT=18}
+        \caption{k=36 Nodes, W=600, $VT$=50\%}
     \end{subfigure}
-    \caption{Top and center figures depict DLDA's performance on the Power Supply data set for a small (top) and large (center) number of nodes. The blue line in (a) and (b) represents the value of the local bound, corresponding to the node with the maximum value. The green dashed line depicts the model drift (normalized by the threshold); the model is computed after the data was aggregated from all nodes. The bottom plot shows the results of PDLDA on the same dataset. The blue line in the bottom plot represents the fraction of violated nodes.}\label{PowerSupplyFigures}
+    \caption{Top and center figures depict DLDA's performance on the Power Supply data set for a small (top) and large (center) number of nodes. The blue line in (a) and (b) represents the value of the local bound, corresponding to the node with the maximum value. The green dashed line depicts the model drift (normalized by the threshold); the model is computed after the data was aggregated from all nodes. The bottom plot shows the results of PDLDA on the same dataset. The blue line in the bottom plot represents the fraction of violated nodes; for this number of nodes (36), PDLDA substantially improves over DLDA.}\label{PowerSupplyFigures}
     %\label{powerSupply}
 \end{figure}
 	
 \subsubsection{Gas Sensor Time Series Monitoring} 
 %
-Data in this dataset \cite{fonollosa2015reservoir} consists of measurements collected
-by an array of 16 chemical sensors in a lab, recording at a sampling
-rate of 100Hz for 24 hours, resulting in 8378504 data points for each sensor.
+This dataset \cite{fonollosa2015reservoir}  (8,378,504 instances, 16 attributes) consists of measurements collected
+by an array of 16 chemical sensors in a lab, recorded at a sampling
+rate of 100Hz for 24 hours, resulting in 8378504 data points for each sensor (original dimensionality of 16).
 During the first 12 hours the task is to detect the presence of carbon monoxide
 (CO) in a mixture of chemicals, and from the 13th hour onwards the task is to detect the presence of methane, 
 which corresponds to an abrupt change in the data.
 Figure \ref{BigGasOverTime} demonstrates the results of the PDLDA algorithm.
 First, we observe that the fraction of violated nodes (shown in blue) correlates with the true model drift (shown in green). Second, we observe two patterns of behavior, which are separated by an abrupt change in the data  (marked by the vertical red line). Before the change,  synchronization occurs every 150 rounds, and after it, 
 the synchronization rate decreases to every 50 rounds. There is a transition period of about 1000 rounds that follows the point in time at which the data changes. In this interval, the sliding window is a "mixture" of the old (pre-change) data and new (post-change) data; however, once the window aggregates enough data, the algorithm stabilizes and the communication overhead drops. This experiment shows that the PDLDA algorithm detects the abrupt change in the data and adapts to the new conditions after a short period of time.
-Lastly, we compare PDLDA to PER for the gas sensor data (Figure \ref{BigGasOverTime}).
+Lastly, we compare PDLDA to PER for this data (Figure \ref{PDLADvsPERGas}).
 
 \begin{figure*}[t]
 \centering
+  \includegraphics[width=\textwidth, height=40mm]{graphics/overTime100k.png}%
+  \caption{Running PDLDA on the gas sensor dataset.
+    A comparison between the true model drift (green) to the fraction of the nodes in
+    which a violation occurred  (blue).
+    There are $k=100$ nodes, and the violation threshold is
+    $VT=80\%$. While there are (naturally) more synchronizations when the data
+    changes abruptly (near round 4000), communication overhead drops when the
+    system stabilizes.}
+    \label{BigGasOverTime}%
+\end{figure*}
 
-\subfloat{%
-  \includegraphics[width=120mm, height=37mm]{graphics/overTime100k.png}%
-  \label{BigGasOverTime}%
-}\qquad
-\subfloat{%
-  \includegraphics[width=50mm, height=36mm ]{graphics/PDLADvsPERGas.png}%
-  \label{PDLADvsPERGas}%
-}
-
-\caption{In the left subfigure there is a Demonstration of PDLDA on the Gas Sensor dataset.
-A comparison between the true model drift (green) to the fraction of the nodes that
-are violated in the current round (blue).
-There are $k=100$ nodes, and the violation threshold is
-$VT=80$. While there are (naturally) more synchronizations when the data
-changes abruptly (near round 4000), communication overhead drops when the
-system stabilizes.
-\\ In the right subfigure we show  PDLDA error (blue) vs. PER(50) error (green), for the Gas Sensor dataset. Horizontal axis represents rounds, vertical
-	axis represents the norm of the difference between the real (global) model and the current model held at the nodes. Window size is 25,000.
+\begin{figure}
+  \includegraphics[width=80mm,height=40mm]{graphics/PDLADvsPERGas.png}%
+ \caption{PDLDA error (blue) vs. PER(50) error (green), for the Gas Sensor dataset. Horizontal axis represents rounds, vertical
+	axis  the (normalized) norm of the difference between the real (global) model and the current model held at the nodes. Window size is 25,000 (i.e. 250 per node).
 	The maximum allowed error (which DLDA guarantees will never be
 	exceeded) is $T = 0.97$ (which corresponds to a difference of
 	0.24 radians, or $14^{\circ}$, in the classifier's orientation). Both
@@ -757,15 +765,16 @@ system stabilizes.
 	rounds; while PER sends alerts periodically, DLDA alerts only when the 
 	classifier may have changed. For this reason, PER results in a larger
 	error when the two classes change. }
-\label{BigGasOverTime}%
-\end{figure*}
+\label{PDLADvsPERGas}%
+\end{figure}
 
 
 
 
 
 \section*{Conclusions}
-We introduced what is, to the best of our knowledge, the first communication-efficient monitoring algorithm for a classifier in a distributed streaming environment. 
+We introduced what is, to the best of our knowledge, the first communication-efficient monitoring algorithm for a classifier in a distributed streaming environment, with guaranteed
+error bounds.
 Further, we monitor the
 model itself, allowing to detect model drift before misclassifications occur.
 As long as all nodes meet their local condition, as defined in
@@ -782,11 +791,11 @@ the last centrally computed model and the current true model, while maintaining
 lower communication overhead.
 
 This work is hopefully an initial step in designing communication-efficient algorithms
-with theoretical guarantees for monitoring classification models over dynamic, distributed data streams. One of the future directions is to extend the proposed framework to
+with theoretical guarantees for monitoring classification models over dynamic, distributed data streams, for example
 ensembles of linear classifiers, support vector machines, and neural networks.
 
 % BibTeX users please use one of
 \bibliographystyle{abbrv}
 \bibliography{bib}   % name your BibTeX data base
-\nocite{*}
+%\nocite{*}
 

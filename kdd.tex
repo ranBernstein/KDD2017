@@ -91,7 +91,7 @@ Real systems for mining data streams should be able to detect changes that affec
 while preserving the validity of the global model (that is, the model that will be computed if a synchronization takes place). To achieve this goal, we propose the first communication-efficient algorithm for monitoring a classification model over distributed, dynamic data streams. The classifier we monitor is Linear Discriminant Analysis (LDA), a popular method for classification and dimensionality reduction in many fields.  The emphasis of this work is \emph{not} on solving the distributed optimization problem
 that corresponds to finding a classifier over the distributed data; instead, we continuously
 monitor the current classifier to check that it still fits the data. In addition to the theoretical guarantee of the proposed monitoring algorithm, we demonstrate how it reduces communication volume by up to two orders of magnitude (compared to synchronization in every round) on three real data sets from different worlds of content, as well as its advantage over the
-popular periodic sampling paradigm. Moreover, our approach monitors the \emph{classification model itself} as opposed to its misclassifications, which makes it possible to detect the change before misclassification occurs.
+popular periodic sampling paradigm. Moreover, our approach monitors the \emph{classification model itself} as opposed to its misclassifications, which makes it possible to detect the change before misclassifications occurs.
 \end{abstract}
 
 
